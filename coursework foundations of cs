@@ -1,0 +1,32 @@
+import math
+
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0
+    else:
+        d, x, y = extended_gcd(b, a % b)
+        return d, y, x - (a // b) * y
+
+def mod_inv(a, m):
+    d, x, y = extended_gcd(a, m)
+    if d != 1:
+        raise ValueError("Inverse does not exist")
+    return x % m
+
+def brute_force_private_exponent(N, e):
+    phi = (p - 1) * (q - 1)
+    for d in range(2, phi):
+        if (d * e) % phi == 1:
+            return d
+    return None
+
+# Example usage
+N = 221  # Modulus
+e = 11   # Public exponent
+
+d = brute_force_private_exponent(N, e)
+if d:
+    print("Private exponent found:", d)
+else:
+    print("Failed to brute force private exponent.")
+
