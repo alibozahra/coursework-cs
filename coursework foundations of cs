@@ -1,32 +1,34 @@
 import math
+import time
 
-def extended_gcd(a, b):
+def gcd(a, b):
     if b == 0:
-        return a, 1, 0
-    else:
-        d, x, y = extended_gcd(b, a % b)
-        return d, y, x - (a // b) * y
+        return a
+    return gcd(b, a % b)
 
 def mod_inv(a, m):
-    d, x, y = extended_gcd(a, m)
-    if d != 1:
-        raise ValueError("Inverse does not exist")
-    return x % m
+    m0, x0, x1 = m, 0, 1
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    return x1 + m0 if x1 < 0 else x1
 
-def brute_force_private_exponent(N, e):
-    phi = (p - 1) * (q - 1)
-    for d in range(2, phi):
-        if (d * e) % phi == 1:
-            return d
-    return None
+def brute_force_private_exponent(N, e, ciphertext, original_message):
+    start_time = time.time()
+    phi = N - 1  # Assuming N is a product of two distinct prime numbers (RSA modulus)
+    d = 2  # Initial guess for d
+    while True:
+        if pow(ciphertext, d, N) == original_message:  # Check if decryption matches original message
+            end_time = time.time()
+            runtime = end_time - start_time
+            return d, runtime
+        d += 1
 
-# Example usage
-N = 221  # Modulus
-e = 11   # Public exponent
-
-d = brute_force_private_exponent(N, e)
-if d:
-    print("Private exponent found:", d)
-else:
-    print("Failed to brute force private exponent.")
+def calculate_runtime(N, e, ciphertext, original_message):
+    d, runtime = brute_force_private_exponent(N, e, ciphertext, original_message)
+    if d is not None and runtime is not None:
+        return d, runtime
+    else:
+        return None, None
 

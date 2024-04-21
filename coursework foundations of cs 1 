@@ -1,4 +1,5 @@
 import math
+import time
 
 def gcd(a, b):
     if b == 0:
@@ -13,40 +14,23 @@ def mod_inv(a, m):
         x0, x1 = x1 - q * x0, x0
     return x1 + m0 if x1 < 0 else x1
 
-def factor_modulus(N):
-    e = 65537  # assume public exponent is known
+def factor_modulus(N, e):
+    start_time = time.time()
     for k in range(2, int(math.sqrt(N)) + 1):
         if N % k == 0:
             p, q = k, N // k
             phi = (p - 1) * (q - 1)
             if gcd(e, phi) == 1:
                 d = mod_inv(e, phi)
-                return p, q, d
-    return None
+                end_time = time.time()
+                runtime = end_time - start_time
+                return p, q, d, runtime
+    return None, None, None, None 
 
-def encrypt(message, public_key):
-    N, e = public_key
-    return pow(message, e, N)
+def calculate_runtime(N, e):
+    p, q, d, runtime = factor_modulus(N, e)
+    if p is not None and q is not None and d is not None and runtime is not None:
+        return p, q, d, runtime
+    else:
+        return None, None, None, None
 
-def decrypt(ciphertext, private_key):
-    N, d = private_key
-    return pow(ciphertext, d, N)
-
-# Example usage
-N = 221
-e = 11
-ciphertext = 65
-
-# Assuming public key is known
-public_key = (N, e)
-
-# Factorizing N to find private key
-p, q, d = factor_modulus(N)
-if d:
-    private_key = (N, d)
-
-    # Decrypting the ciphertext
-    decrypted_message = decrypt(ciphertext, private_key)
-    print("Decrypted message:", decrypted_message)
-else:
-    print("Failed to factorize N.")
